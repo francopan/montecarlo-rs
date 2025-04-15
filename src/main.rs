@@ -63,10 +63,15 @@ fn generate_cumulative_table(confidence_table: &BTreeMap<u16, u32>) -> BTreeMap<
 }
 
 fn print_cumulative_table(cumulative_table: &BTreeMap<u16, u32>, max_rounds: u32) {
-    println!("Sprint\tTotal\t| Confidence (%)");
+    println!(
+        "{:<8} | {:<7} | {:<25}",
+        "Sprint", "Total", "Confidence of completion (%)"
+    );
+    println!("{:-<8} | {:-<7} | {:-<25}", "", "", "");
+
     for (&key, &value) in cumulative_table {
         let percentage = (value as f32 / max_rounds as f32) * 100.0;
-        println!("{:<7}\t{:<6}\t| {:.2}%", key, value, percentage);
+        println!("{:<8} | {:<7} | {:<25.2}%", key, value, percentage);
     }
 }
 
@@ -105,6 +110,14 @@ fn read_sprint_history() -> Result<SmallVec<[u16; 8]>, Box<dyn Error>> {
     Ok(historic_story_points_per_sprint)
 }
 
+fn pause() {
+    println!("\n\nPress Enter to exit...");
+    let mut input = String::new();
+    io::stdin()
+        .read_line(&mut input)
+        .expect("Failed to read line");
+}
+
 fn main() {
     let historic_story_points_per_sprint = match read_sprint_history() {
         Ok(history) => history,
@@ -129,10 +142,13 @@ fn main() {
         + (target_story_points as f32 * (new_task_every_10 as f32 / 10.0)))
         .round() as u16;
 
+    println!("\n");
     run_sprints(
         new_target_story_points,
         historic_story_points_per_sprint,
         sprint_allocation,
         MAX_ROUNDS,
     );
+
+    pause();
 }
